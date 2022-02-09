@@ -1,0 +1,1 @@
+2022-02-09 01:34:04 ERROR [game/main.go:86] 中心服系统错误Post "http://127.0.0.1:2000/getGameServerConfig": dial tcp 127.0.0.1:2000: connect: connection refused

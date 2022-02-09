@@ -1,0 +1,8 @@
+{
+  "1": {
+    "database": "root:2745517123@tcp(127.0.0.1:3306)/hs_cross_1",
+    "signatureKey": "fb45c06ff5aefa76c4aa254261ec085e",
+    "optAddress": "http://127.0.0.1:2000",
+    "log": "gamelog"
+  }
+}

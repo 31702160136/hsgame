@@ -1,0 +1,45 @@
+2022-01-15 22:03:24 ERROR [game/main.go:86] 中心服系统错误Post "http://127.0.0.1:2000/getServerConfig": dial tcp 127.0.0.1:2000: connect: connection refused
+2022-01-15 22:07:10 ERROR [sysdatadao/sysdata.go:83] unexpected EOF
+2022-01-15 22:07:10 ERROR [sysdatadao/sysdata.go:83] unexpected EOF
+2022-01-15 22:07:12 ERROR [sysdatadao/sysdata.go:83] unexpected EOF
+2022-01-15 22:07:12 ERROR [sysdatadao/sysdata.go:83] unexpected EOF
+2022-01-15 22:07:14 ERROR [sysdatadao/sysdata.go:83] unexpected EOF
+2022-01-15 22:07:14 ERROR [sysdatadao/sysdata.go:83] unexpected EOF
+2022-01-15 22:07:16 ERROR [sysdatadao/sysdata.go:83] unexpected EOF
+2022-01-15 22:07:16 ERROR [sysdatadao/sysdata.go:83] unexpected EOF
+2022-01-15 22:08:14 ERROR [sysdatadao/sysdata.go:86] unexpected EOF
+2022-01-15 22:08:14 ERROR [sysdatadao/sysdata.go:86] unexpected EOF
+2022-01-15 22:08:16 ERROR [sysdatadao/sysdata.go:86] unexpected EOF
+2022-01-15 22:08:16 ERROR [sysdatadao/sysdata.go:86] unexpected EOF
+2022-01-15 22:11:00 ERROR [sysdatadao/sysdata.go:83] zlib: invalid header
+2022-01-15 22:11:00 ERROR [sysdatadao/sysdata.go:83] zlib: invalid header
+2022-01-15 22:11:02 ERROR [sysdatadao/sysdata.go:83] zlib: invalid header
+2022-01-15 22:11:02 ERROR [sysdatadao/sysdata.go:83] zlib: invalid header
+2022-01-15 22:11:04 ERROR [sysdatadao/sysdata.go:83] zlib: invalid header
+2022-01-15 22:11:04 ERROR [sysdatadao/sysdata.go:83] zlib: invalid header
+2022-01-15 22:11:06 ERROR [sysdatadao/sysdata.go:83] zlib: invalid header
+2022-01-15 22:11:06 ERROR [sysdatadao/sysdata.go:83] zlib: invalid header
+2022-01-15 22:11:09 ERROR [sysdatadao/sysdata.go:83] zlib: invalid header
+2022-01-15 22:11:09 ERROR [sysdatadao/sysdata.go:83] zlib: invalid header
+2022-01-15 22:12:03 ERROR [sysdatadao/sysdata.go:83] zlib: invalid header
+2022-01-15 22:12:03 ERROR [sysdatadao/sysdata.go:83] zlib: invalid header
+2022-01-15 22:12:09 ERROR [sysdatadao/sysdata.go:83] zlib: invalid header
+2022-01-15 22:12:09 ERROR [sysdatadao/sysdata.go:83] zlib: invalid header
+2022-01-15 22:12:11 ERROR [sysdatadao/sysdata.go:83] zlib: invalid header
+2022-01-15 22:12:11 ERROR [sysdatadao/sysdata.go:83] zlib: invalid header
+2022-01-15 22:14:18 ERROR [sysdatadao/sysdata.go:83] zlib: invalid header
+2022-01-15 22:14:18 ERROR [sysdatadao/sysdata.go:83] zlib: invalid header
+2022-01-15 22:14:20 ERROR [sysdatadao/sysdata.go:83] zlib: invalid header
+2022-01-15 22:14:20 ERROR [sysdatadao/sysdata.go:83] zlib: invalid header
+2022-01-15 22:15:35 ERROR [sysdatadao/sysdata.go:84] Error 1292: Truncated incorrect DOUBLE value: 'x??+??'
+2022-01-15 22:15:35 ERROR [sysdatadao/sysdata.go:84] Error 1292: Truncated incorrect DOUBLE value: 'x???'
+2022-01-15 22:15:37 ERROR [sysdatadao/sysdata.go:84] Error 1292: Truncated incorrect DOUBLE value: 'x???'
+2022-01-15 22:15:37 ERROR [sysdatadao/sysdata.go:84] Error 1292: Truncated incorrect DOUBLE value: 'x??+??'
+2022-01-15 22:15:40 ERROR [sysdatadao/sysdata.go:84] Error 1292: Truncated incorrect DOUBLE value: 'x???'
+2022-01-15 22:15:40 ERROR [sysdatadao/sysdata.go:84] Error 1292: Truncated incorrect DOUBLE value: 'x??+??'
+2022-01-15 22:15:42 ERROR [sysdatadao/sysdata.go:84] Error 1292: Truncated incorrect DOUBLE value: 'x???'
+2022-01-15 22:15:42 ERROR [sysdatadao/sysdata.go:84] Error 1292: Truncated incorrect DOUBLE value: 'x??+??'
+2022-01-15 22:15:44 ERROR [sysdatadao/sysdata.go:84] Error 1292: Truncated incorrect DOUBLE value: 'x???'
+2022-01-15 22:15:44 ERROR [sysdatadao/sysdata.go:84] Error 1292: Truncated incorrect DOUBLE value: 'x??+??'
+2022-01-15 22:15:46 ERROR [sysdatadao/sysdata.go:84] Error 1292: Truncated incorrect DOUBLE value: 'x??+??'
+2022-01-15 22:15:46 ERROR [sysdatadao/sysdata.go:84] Error 1292: Truncated incorrect DOUBLE value: 'x???'

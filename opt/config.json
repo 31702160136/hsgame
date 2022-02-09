@@ -1,0 +1,12 @@
+{
+  "port": 2000,
+  "HttpSpanPort": 10000,
+  "dbPort": 27017,
+  "dbHost": "127.0.0.1",
+  "dbName": "hs_opt",
+  "dbAuthSource": "",
+  "dbUserName": "",
+  "dbPassword": "",
+  "log": "gamelog",
+  "signatureKey": "fb45c06ff5aefa76c4aa254261ec085e"
+}
