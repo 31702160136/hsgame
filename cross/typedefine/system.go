@@ -7,8 +7,7 @@ import (
 
 //该数据为系统数据，系统启动后就会加载完毕
 type SystemData struct {
-	Common          *Common                    //公共数据
-	SystemActorData map[int64]*SystemActorData //玩家数据
+	Common *Common //公共数据
 }
 
 /*
@@ -20,17 +19,15 @@ type SystemData struct {
 
 //系统数据对象的key
 const (
-	KeyCommon          = 1
-	KeySystemActorData = 2
+	KeyCommon = 1
 )
 
 var (
 	SysKeys = map[int]bool{
-		KeyCommon:          true,
-		KeySystemActorData: true,
+		KeyCommon: true,
 	}
 	systemData = &SystemData{
-		SystemActorData: map[int64]*SystemActorData{},
+		Common: &Common{},
 	}
 )
 
@@ -38,8 +35,6 @@ func LoadSysData(key int, data []byte) {
 	switch key {
 	case KeyCommon:
 		_ = jsoniter.Unmarshal(data, &systemData.Common)
-	case KeySystemActorData:
-		_ = jsoniter.Unmarshal(data, &systemData.SystemActorData)
 	}
 }
 
@@ -49,8 +44,6 @@ func MarshalData(key int) []byte {
 	switch key {
 	case KeyCommon:
 		data, err = jsoniter.Marshal(systemData.Common)
-	case KeySystemActorData:
-		data, err = jsoniter.Marshal(systemData.SystemActorData)
 	}
 	if err != nil {
 		log.Error(err.Error())
@@ -59,18 +52,8 @@ func MarshalData(key int) []byte {
 }
 
 type Common struct {
-	MaxGameServerId  int
-	MaxCrossServerId int
-}
-
-type SystemActorData struct {
-	ActorId int64
 }
 
 func GetCommonData() *Common {
 	return systemData.Common
-}
-
-func GetSystemActorData(actorId int64) *SystemActorData {
-	return systemData.SystemActorData[actorId]
 }

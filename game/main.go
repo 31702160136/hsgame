@@ -32,7 +32,6 @@ func main() {
 	if err != nil {
 		panic(configName + "," + err.Error())
 	}
-	fmt.Println(bt)
 
 	//加载配置信息
 	cnfs := make(map[int]map[string]interface{})
@@ -105,11 +104,12 @@ func main() {
 	database.OnInitDatabaseFinishCallBack()
 	//加载数据
 	database.OnLoadData()
-	fmt.Println("load config...")
+	log.Info("load config...")
 	//加载配置
 	config.LoadConfig()
 	service.OnConfigLoadFinish()
-	fmt.Println("create http engine")
+	log.Info("create http engine")
+	gin.SetMode(gin.ReleaseMode)
 	//注册http引擎
 	httpEngine := gin.New()
 	httpEngine.POST("/gm/:name", gm.GmHandle)
@@ -135,7 +135,7 @@ func main() {
 	go func() {
 		isClose := false
 		for {
-			sec := 2
+			sec := 60 * 30
 			c := time.NewTimer(gtime.Duration(sec))
 			select {
 			case <-c.C:
@@ -166,7 +166,7 @@ func main() {
 	service.OnGameStart()
 	signal.Notify(sysClose, os.Interrupt, os.Kill)
 	log.Infof(
-		"game start success gamePort:[%d] httpPort[%d]",
+		"Game Start Success GamePort:[%d] HTTPPort[%d]",
 		config.ServerConfig.Port,
 		config.ServerConfig.Port+config.ServerConfig.HttpSpanPort,
 	)
@@ -226,5 +226,4 @@ func gameGate(ctx *gin.Context) {
 		reader.Read(&sys, &cmd)
 		dispatch.PushClientMessage(sys, cmd, account, reader)
 	}
-	fmt.Println()
 }

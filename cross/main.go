@@ -5,6 +5,7 @@ import (
 	"cross/common/ihttp"
 	"cross/config"
 	"cross/database"
+	_ "cross/database/sysdatadao"
 	"cross/dispatch"
 	"cross/gtime"
 	"cross/log"
@@ -99,11 +100,12 @@ func main() {
 	database.OnInitDatabaseFinishCallBack()
 	//加载数据
 	database.OnLoadData()
-	fmt.Println("load config...")
+	log.Info("load config...")
 	//加载配置
 	config.LoadConfig()
 	service.OnConfigLoadFinish()
-	fmt.Println("create http engine")
+	log.Info("create http engine")
+	gin.SetMode(gin.ReleaseMode)
 	//注册http引擎
 	httpEngine := gin.New()
 	httpEngine.POST("/gm/:name", gm.GmHandle)
@@ -119,7 +121,7 @@ func main() {
 	go func() {
 		isClose := false
 		for {
-			sec := 2
+			sec := 60 * 30
 			c := time.NewTimer(gtime.Duration(sec))
 			select {
 			case <-c.C:
@@ -150,7 +152,7 @@ func main() {
 	service.OnGameStart()
 	signal.Notify(sysClose, os.Interrupt, os.Kill)
 	log.Infof(
-		"game start success gamePort:[%d] httpPort[%d]",
+		"Cross Start Success Cross-Port:[%d] HTTP-Port[%d]",
 		config.ServerConfig.Port,
 		config.ServerConfig.Port+config.ServerConfig.HttpSpanPort,
 	)

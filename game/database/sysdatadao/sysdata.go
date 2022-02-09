@@ -11,8 +11,8 @@ import (
 
 const sql = `
 CREATE TABLE sysdata (
-  id int NOT NULL COMMENT key,
-  data longblob COMMENT,
+  id int NOT NULL COMMENT 'key',
+  data longblob COMMENT '数据',
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;`
 
@@ -33,7 +33,7 @@ func initDatabase() {
 		}
 	}
 	for key, _ := range t.SysKeys {
-		result, err := db.Query("select id,`data` from sysdata where id=?", key)
+		result, err := db.Query("select id from sysdata where id=?", key)
 		if err != nil {
 			log.Error(err.Error())
 			continue

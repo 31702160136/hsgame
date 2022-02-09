@@ -49,6 +49,7 @@ func main() {
 	config.LoadConfig()
 	service.OnConfigLoadFinish()
 	log.Info("create http engine")
+	gin.SetMode(gin.ReleaseMode)
 	//注册http引擎
 	engine := gin.New()
 	engine.Use(cors())
@@ -92,13 +93,13 @@ func main() {
 	}()
 	service.OnGameStart()
 	signal.Notify(sysClose, os.Interrupt, os.Kill)
-	log.Info("game start success")
+	log.Info("Opt Start Success")
 	<-sysClose
 	closeAutoSaveData <- 1
 	<-closeAutoSaveData
 	service.OnGameClose()
 	service.OnSaveDataBase()
-	log.Info("game close")
+	log.Info("Opt Close")
 	log.Close()
 }
 
