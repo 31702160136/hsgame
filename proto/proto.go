@@ -7,12 +7,14 @@ package proto
 
 //跨服
 const (
-	CrossActorMsg = 1
+	CrossActorMsg      = 1 //玩家消息
+	CrossReplyActorMsg = 2 //回复玩家消息
 )
 
 //基础
 const (
 	System int16 = 1
+	Test   int16 = 2 //测试
 )
 
 //System
@@ -26,4 +28,11 @@ const (
 	SystemSCreateActor  int16 = 4 //创建角色
 	SystemCEnterGame    int16 = 5 //进入游戏
 	SystemSEnterGame    int16 = 5 //进入游戏
+)
+
+const (
+	TestCTest      int16 = 1
+	TestSTest      int16 = 1
+	TestCCrossTest int16 = 2
+	TestSCrossTest int16 = 2
 )

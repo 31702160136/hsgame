@@ -2,8 +2,10 @@ package pack
 
 import (
 	"bytes"
+	t "cross/typedefine"
 	"encoding/binary"
 	"errors"
+	jsoniter "github.com/json-iterator/go"
 	"reflect"
 )
 
@@ -33,30 +35,30 @@ func (this *Reader) Read(datas ...interface{}) {
 		switch val := data.(type) {
 		case *int8, *uint8, *int16, *uint16, *int32, *uint32, *int64, *uint64, *float64:
 			if err := binary.Read(reader, littleEndian, val); err != nil {
-				panic(readerErr)
+				panic(err.Error())
 			}
 		case *int:
 			var tv int32
-			if err := binary.Read(reader, littleEndian, tv); err != nil {
-				panic(readerErr)
+			if err := binary.Read(reader, littleEndian, &tv); err != nil {
+				panic(err.Error())
 			}
 			*val = int(tv)
 		case *uint:
 			var tv uint32
-			if err := binary.Read(reader, littleEndian, tv); err != nil {
-				panic(readerErr)
+			if err := binary.Read(reader, littleEndian, &tv); err != nil {
+				panic(err.Error())
 			}
 			*val = uint(tv)
 		case []byte:
 			if len(val) > 0 {
 				if _, err := reader.Read(val); err != nil {
-					panic(readerErr)
+					panic(err.Error())
 				}
 			}
 		case *string:
 			var l uint16
 			if err := binary.Read(reader, littleEndian, &l); err != nil {
-				panic(readerErr)
+				panic(err.Error())
 			}
 			s := make([]byte, l)
 			n, _ := reader.Read(s)
@@ -67,12 +69,24 @@ func (this *Reader) Read(datas ...interface{}) {
 		case *bool:
 			var v byte
 			if err := binary.Read(reader, littleEndian, &v); err != nil {
-				panic(readerErr)
+				panic(err.Error())
 			}
 			if v == 1 {
 				*val = true
 			} else {
 				*val = false
+			}
+		case *t.CrossActor:
+			var length int32
+			if err := binary.Read(reader, littleEndian, &length); err != nil {
+				panic(err.Error())
+			}
+			buf := make([]byte, length)
+			if _, err := reader.Read(buf); err != nil {
+				panic(err.Error())
+			}
+			if err := jsoniter.Unmarshal(buf, val); err != nil {
+				panic(err.Error())
 			}
 		default:
 			panic("reader invalid type " + reflect.TypeOf(data).String())

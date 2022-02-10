@@ -1,13 +1,17 @@
 package typedefine
 
 import (
-	"game/pack"
 	"github.com/gorilla/websocket"
 	"sync"
 )
 
+var (
+	EncodeWriter func(writer interface{}) []byte
+	PackWriter   func(sys, cmd int16, data ...interface{}) []byte
+)
+
 type Account struct {
-	ActorId      int64
+	Actor        *Actor
 	AccountId    string
 	Conn         *websocket.Conn
 	IP           string
@@ -53,20 +57,18 @@ func (this *Account) WriterMsg(data []byte) {
 	this.dataMux.Unlock()
 }
 
-func (this *Account) ReplyWriter(writer *pack.Writer) {
+func (this *Account) ReplyWriter(writer interface{}) {
 	if this.IsClose() {
 		return
 	}
-	this.WriterMsg(writer.Bytes())
+	this.WriterMsg(EncodeWriter(writer))
 }
 
 func (this *Account) Reply(sys, cmd int16, data ...interface{}) {
 	if this.IsClose() {
 		return
 	}
-	writer := pack.NewWriter(sys, cmd)
-	writer.Writer(data...)
-	this.WriterMsg(writer.Bytes())
+	this.WriterMsg(PackWriter(sys, cmd, data...))
 }
 
 func (this *Account) SyncReply(msg []byte) {

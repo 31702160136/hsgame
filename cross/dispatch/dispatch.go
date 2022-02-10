@@ -31,7 +31,7 @@ var (
 	wait           = make(chan byte)
 	isWait         = false
 
-	clientActorMsg = make(map[int]func(actor *t.Actor, reader *pack.Reader))
+	clientActorMsg = make(map[int]func(actor *t.CrossActor, reader *pack.Reader))
 	crossMsg       = make(map[int]func(serverId int, reader *pack.Reader))
 )
 
@@ -48,7 +48,7 @@ func OnRunGame() {
 }
 
 //push消息
-func PushClientMessage(sys, cmd int16, args ...interface{}) {
+func PushClientActorMessage(sys, cmd int16, reader *pack.Reader) {
 	var cbFunc interface{}
 	msgType := byte(0)
 	cbFun, ok := clientActorMsg[cmdId(sys, cmd)]
@@ -56,9 +56,11 @@ func PushClientMessage(sys, cmd int16, args ...interface{}) {
 		log.Errorf("clientActorMsg %d-%d not found\n%s", sys, cmd, string(debug.Stack()))
 		return
 	}
+	actor := &t.CrossActor{}
+	reader.Read(actor)
 	cbFunc = cbFun
 	msgType = TypeClientActorMsg
-	pushMessage(fmt.Sprintf("proto %d-%d", sys, cmd), msgType, cbFunc, args...)
+	pushMessage(fmt.Sprintf("proto %d-%d", sys, cmd), msgType, cbFunc, actor, reader)
 }
 
 //push消息
@@ -126,7 +128,7 @@ func readMsgs() []*message {
 }
 
 //注册客户端角色消息
-func RegClientActorMsg(sys, cmd int16, fun func(actor *t.Actor, reader *pack.Reader)) {
+func RegClientActorMsg(sys, cmd int16, fun func(actor *t.CrossActor, reader *pack.Reader)) {
 	clientActorMsg[cmdId(sys, cmd)] = fun
 }
 
@@ -161,7 +163,7 @@ func PushSystemSyncMsg(msgName string, cbFunc interface{}, args ...interface{}) 
 	pushMessage("pushSystemSyncMsg: "+msgName, TypeSystemMsg, cbFunc, args...)
 }
 
-//推送系统线程消息
+//推送系统线程消息cmdId
 func PushSystemGoMsg(msgName string, cbFunc interface{}, args ...interface{}) {
 	pushMessage("pushSystemGoMsg: "+msgName, TypeSystemGoMsg, cbFunc, args...)
 }

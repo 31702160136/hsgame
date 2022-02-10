@@ -35,12 +35,12 @@ func (this *Writer) Writer(datas ...interface{}) {
 				panic(readerErr)
 			}
 		case int:
-			var tv int32
+			var tv = int32(val)
 			if err := binary.Write(writer, littleEndian, tv); err != nil {
 				panic(readerErr)
 			}
 		case uint:
-			var tv uint32
+			var tv = uint32(val)
 			if err := binary.Write(writer, littleEndian, tv); err != nil {
 				panic(readerErr)
 			}

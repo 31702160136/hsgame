@@ -12,7 +12,9 @@ import (
 	"game/pack"
 	"game/service"
 	account2 "game/service/account"
+	_ "game/service/cross"
 	"game/service/gm"
+	_ "game/service/test"
 	t "game/typedefine"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -96,7 +98,9 @@ func main() {
 
 	bt, err = jsoniter.Marshal(result.Data)
 	err = jsoniter.Unmarshal(bt, &config.ServerConfig)
-
+	if err != nil {
+		log.Fatal(err)
+	}
 	log.Info("load database...")
 	//初始化数据库
 	database.OnInitDataBase()

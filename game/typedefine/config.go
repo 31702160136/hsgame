@@ -12,7 +12,7 @@ type ServerConfig struct {
 	Port         int    `json:"port"`
 	HttpSpanPort int    `json:"http_span_port"`
 	Nats         string `json:"nats"`
-	CrossGroup   int    `json:"cross_group"`
+	CrossServer  int    `json:"cross_server"`
 	MaxOnline    int    `json:"max_online"`
 }
 

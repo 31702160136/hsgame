@@ -37,13 +37,13 @@ func (this *Reader) Read(datas ...interface{}) {
 			}
 		case *int:
 			var tv int32
-			if err := binary.Read(reader, littleEndian, tv); err != nil {
+			if err := binary.Read(reader, littleEndian, &tv); err != nil {
 				panic(readerErr)
 			}
 			*val = int(tv)
 		case *uint:
 			var tv uint32
-			if err := binary.Read(reader, littleEndian, tv); err != nil {
+			if err := binary.Read(reader, littleEndian, &tv); err != nil {
 				panic(readerErr)
 			}
 			*val = uint(tv)

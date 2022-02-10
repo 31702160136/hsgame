@@ -12,10 +12,10 @@ import (
 	"game/gtime"
 	"game/log"
 	"game/pack"
-	"proto"
 	"game/service"
 	t "game/typedefine"
 	jsoniter "github.com/json-iterator/go"
+	"proto"
 )
 
 const (
@@ -99,14 +99,20 @@ func accountLogout(account *t.Account, tag byte) {
 }
 
 func onLogout(account *t.Account, tag byte) {
-	defer accountdao.DelAccount(account.AccountId)
-	defer actordao.UnOnlineActor(account.ActorId)
-	actor := actordao.GetOnlineActor(account.ActorId)
-	if actor != nil {
-		actor.Account = nil
-		actor.LogoutTime = gtime.Now().Unix()
-		log.Infof("actor(%d) logout", actor.ActorId)
+	defer func() {
+		accountdao.DelAccount(account.AccountId)
+		if account.Actor == nil {
+			return
+		}
+		actordao.UnOnlineActor(account.Actor.ActorId)
+		account.Actor = nil
+	}()
+	if account.Actor != nil {
+		account.Actor.Account = nil
+		account.Actor.LogoutTime = gtime.Now().Unix()
+		log.Infof("actor(%d) logout", account.Actor.ActorId)
 	}
+	//异步
 	dispatch.PushSystemAsyncMsg("logoutTag", nil, func(account2 *t.Account) {
 		accountLogout(account2, tag)
 	}, account)
@@ -178,7 +184,7 @@ func onEnterGame(account *t.Account, reader *pack.Reader) {
 		if actor == nil || actor.AccountId != account.AccountId {
 			return
 		}
-		account.ActorId = actorId
+		account.Actor = actor
 		actor.Account = account
 		actor.LoginTime = gtime.Now().Unix()
 		actordao.AddOnlineActor(actor)

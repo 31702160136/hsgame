@@ -20,8 +20,8 @@ type message struct {
 }
 
 const (
-	TypeClientAccountMsg byte = byte(proto.System) //账号消息
-	TypeClientActorMsg   byte = 2                  //角色消息
+	TypeClientAccountMsg      = byte(proto.System) //客户端账号消息
+	TypeClientActorMsg   byte = 2                  //客户端角色消息
 	TypeSystemMsg        byte = 3                  //系统消息
 	TypeSystemGoMsg      byte = 4                  //系统线程消息
 	TypeCrossMsg         byte = 5                  //跨服消息
@@ -35,6 +35,10 @@ var (
 
 	clientActorMsg   = make(map[int16]map[int16]func(actor *t.Actor, reader *pack.Reader))
 	clientAccountMsg = make(map[int16]func(account *t.Account, reader *pack.Reader))
+
+	clientCrossActorMsg       = make(map[int]byte)
+	crossMsg                  = make(map[int]func(serverId int, reader *pack.Reader))
+	ClientCrossActorMsgHandle func(sys, cmd int16, actor *t.Actor, reader *pack.Reader)
 )
 
 func OnRunGame() {
@@ -50,28 +54,38 @@ func OnRunGame() {
 }
 
 //push消息
-func PushClientMessage(sys, cmd int16, args ...interface{}) {
+func PushClientMessage(sys, cmd int16, account *t.Account, reader *pack.Reader) {
 	var cbFunc interface{}
 	msgType := byte(0)
 	if sys == int16(TypeClientAccountMsg) {
 		cbFun, ok := clientAccountMsg[cmd]
 		if !ok {
-			log.Fatalf("%d-%d not found\n%s", sys, cmd, string(debug.Stack()))
+			log.Errorf("%d-%d not found\n%s", sys, cmd, string(debug.Stack()))
 			return
 		}
 		cbFunc = cbFun
 		msgType = TypeClientAccountMsg
+		pushMessage(fmt.Sprintf("proto %d-%d", sys, cmd), msgType, cbFunc, account, reader)
 	} else {
-		cbFun, ok := clientActorMsg[sys][cmd]
-		if !ok {
-			log.Fatalf("%d-%d not found\n%s", sys, cmd, string(debug.Stack()))
+		if account.Actor == nil {
 			return
 		}
-		cbFunc = cbFun
 		msgType = TypeClientActorMsg
-	}
+		cb, ok := clientActorMsg[sys][cmd]
+		if !ok {
+			_, ok = clientCrossActorMsg[cmdId(sys, cmd)]
+			if !ok {
+				log.Errorf("%d-%d not found\n%s", sys, cmd, string(debug.Stack()))
+				return
+			}
+			cbFunc = ClientCrossActorMsgHandle
+			pushMessage(fmt.Sprintf("proto %d-%d", sys, cmd), msgType, cbFunc, sys, cmd, account.Actor, reader)
+		} else {
+			cbFunc = cb
+			pushMessage(fmt.Sprintf("proto %d-%d", sys, cmd), msgType, cbFunc, account.Actor, reader)
+		}
 
-	pushMessage(fmt.Sprintf("proto %d-%d", sys, cmd), msgType, cbFunc, args...)
+	}
 }
 
 //push消息
@@ -94,7 +108,7 @@ func pushMessage(name string, msgType byte, cbFun interface{}, args ...interface
 func dispatch(msg *message) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Fatalf("%s %v\n%s", msg.Name, err, string(debug.Stack()))
+			log.Errorf("%s %v\n%s", msg.Name, err, string(debug.Stack()))
 		}
 	}()
 	switch msg.Type {
@@ -103,6 +117,8 @@ func dispatch(msg *message) {
 	case TypeClientActorMsg:
 		base.CallReflectFunc(msg.Func, msg.Args...)
 	case TypeSystemMsg:
+		base.CallReflectFunc(msg.Func, msg.Args...)
+	case TypeCrossMsg:
 		base.CallReflectFunc(msg.Func, msg.Args...)
 	case TypeSystemGoMsg:
 		go base.CallReflectFunc(msg.Func, msg.Args...)
@@ -137,6 +153,16 @@ func RegClientAccountMsg(cmd int16, fun func(account *t.Account, reader *pack.Re
 	clientAccountMsg[cmd] = fun
 }
 
+//注册跨服角色消息
+func RegClientCrossActorMsg(sys, cmd int16) {
+	clientCrossActorMsg[cmdId(sys, cmd)] = 1
+}
+
+//注册跨服消息
+func RegCrossMsg(cmdId int, fun func(serverId int, reader *pack.Reader)) {
+	crossMsg[cmdId] = fun
+}
+
 //推送系统异步消息
 /*
 	param
@@ -149,7 +175,7 @@ func PushSystemAsyncMsg(msgName string, cbFunc interface{}, asyncFunc interface{
 	go func() {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Fatalf("pushSystemAsyncMsg: %s %v\n%s", msgName, err, string(debug.Stack()))
+				log.Errorf("pushSystemAsyncMsg: %s %v\n%s", msgName, err, string(debug.Stack()))
 			}
 		}()
 		vals := base.CallReflectFunc(asyncFunc, args...)
@@ -168,7 +194,20 @@ func PushSystemSyncMsg(msgName string, cbFunc interface{}, args ...interface{}) 
 	pushMessage("pushSystemSyncMsg: "+msgName, TypeSystemMsg, cbFunc, args...)
 }
 
+//推送跨服消息
+func PushCrossMsg(serverId, msgId int, reader *pack.Reader) {
+	fun, ok := crossMsg[msgId]
+	if !ok {
+		return
+	}
+	pushMessage(fmt.Sprintf("pushCrossMsg:%d", msgId), TypeCrossMsg, fun, serverId, reader)
+}
+
 //推送系统线程消息
 func PushSystemGoMsg(msgName string, cbFunc interface{}, args ...interface{}) {
 	pushMessage("pushSystemGoMsg: "+msgName, TypeSystemGoMsg, cbFunc, args...)
+}
+
+func cmdId(sys, cmd int16) int {
+	return (int(sys) << 16) + int(cmd)
 }

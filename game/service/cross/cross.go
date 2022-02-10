@@ -3,16 +3,22 @@ package cross
 import (
 	"fmt"
 	"game/config"
+	"game/database/actordao"
+	"game/dispatch"
+	"game/helper"
 	"game/log"
+	"game/pack"
 	"game/service"
+	t "game/typedefine"
 	"github.com/nats-io/nats.go"
+	"proto"
+	"runtime/debug"
 	"sync"
 	"time"
 )
 
 const (
 	subBroadcast = "broadcast"
-	subCross     = "cross_%d"
 	subGame      = "game_%d"
 
 	pubCross     = "cross_%d"
@@ -27,15 +33,17 @@ type message struct {
 }
 
 var (
-	nc     = &nats.Conn{}
-	msgs   = make([]*message, 0)
-	msgMux = &sync.Mutex{}
-	wait   = make(chan byte)
-	isWait = false
+	nc       = &nats.Conn{}
+	messages = make([]*message, 0)
+	msgMux   = &sync.Mutex{}
+	wait     = make(chan byte)
+	isWait   = false
 )
 
 func init() {
+	dispatch.ClientCrossActorMsgHandle = clientCrossActorMsgHandle
 	service.RegGameStart(onGameStart)
+	dispatch.RegCrossMsg(proto.CrossReplyActorMsg, onReplyActor)
 }
 
 func onGameStart() {
@@ -45,10 +53,12 @@ func onGameStart() {
 		config.ServerConfig.Nats,
 		nats.ReconnectWait(time.Second), //重连等待
 		nats.MaxReconnects(-1),
-		nats.DiscoveredServersHandler(func(conn *nats.Conn) {
+		nats.DisconnectErrHandler(func(conn *nats.Conn, err error) {
 			//断开回调
 			log.Info("----------------Nats Discovered---------------")
+			log.Info(err.Error())
 			log.Error("----------------Nats Discovered---------------")
+			log.Error(err.Error())
 		}),
 		nats.ReconnectHandler(func(conn *nats.Conn) {
 			//重连回调
@@ -64,12 +74,7 @@ func onGameStart() {
 		panic(err)
 	}
 
-	// 跨服消息
-	if _, err = nc.Subscribe(fmt.Sprintf(subCross, config.ServerConfig.CrossGroup), recvMsg); err != nil {
-		panic(err)
-	}
-
-	// 游戏服消息
+	//跨服消息
 	if _, err = nc.Subscribe(fmt.Sprintf(subGame, config.ServerId), recvMsg); err != nil {
 		panic(err)
 	}
@@ -91,8 +96,8 @@ func onRun() {
 
 func readMsgs() []*message {
 	msgMux.Lock()
-	msgs := msgs
-	msgs = msgs[len(msgs):]
+	msgs := messages
+	messages = messages[len(messages):]
 	if len(msgs) == 0 {
 		isWait = true
 	}
@@ -104,40 +109,81 @@ func readMsgs() []*message {
 }
 
 func recvMsg(msg *nats.Msg) {
-
+	defer func() {
+		if err := recover(); err != nil {
+			log.Errorf("recvMsg err:%s\n%v", err, string(debug.Stack()))
+		}
+	}()
+	reader := pack.NewReader(msg.Data)
+	var serverId, msgId int
+	reader.Read(&serverId, &msgId)
+	dispatch.PushCrossMsg(serverId, msgId, reader)
 }
 
 //推送游戏服消息
 func PushGameServerMsg(serverId int, id int, data []byte) {
-	pushMsg(fmt.Sprintf(pubGame, serverId), id, data)
+	writer := pack.NewWriter(config.ServerId, id, data)
+	pushMsg(fmt.Sprintf(pubGame, serverId), writer.Bytes())
 }
 
 //推送跨服消息
-func PushCrossServerMsg(id int, data []byte) {
-	pushMsg(fmt.Sprintf(pubCross, config.ServerConfig.CrossGroup), id, data)
+func PushCrossServerMsg(msgId int, data []byte) {
+	writer := pack.NewWriter(msgId, config.ServerId, data)
+	pushMsg(fmt.Sprintf(pubCross, config.ServerConfig.CrossServer), writer.Bytes())
+}
+
+//玩家消息转发到跨服
+func clientCrossActorMsgHandle(sys, cmd int16, actor *t.Actor, reader *pack.Reader) {
+	writer := pack.NewWriter(proto.CrossActorMsg, sys, cmd)
+	writer.Writer(helper.PacketCrossActor(actor))
+	var data = make([]byte, reader.Len())
+	reader.Read(data)
+	writer.Writer(data)
+	pushMsg(fmt.Sprintf(pubCross, config.ServerConfig.CrossServer), writer.Bytes())
 }
 
 //推送global服消息
-func PushGlobalServerMsg(id int, data []byte) {
-	pushMsg(pubGlobal, id, data)
+func PushGlobalServerMsg(msgId int, data []byte) {
+	writer := pack.NewWriter(config.ServerId, msgId, data)
+	pushMsg(pubGlobal, writer.Bytes())
 }
 
 //广播消息(所有游戏服都能收到)
-func PushBroadcastMsg(id int, data []byte) {
-	pushMsg(pubBroadcast, id, data)
+func PushBroadcastMsg(msgId int, data []byte) {
+	writer := pack.NewWriter(config.ServerId, msgId, data)
+	pushMsg(pubBroadcast, writer.Bytes())
 }
 
 //推送消息
-func pushMsg(sub string, id int, data []byte) {
+func pushMsg(sub string, data []byte) {
 	msgMux.Lock()
 	msg := &message{
 		sub:  sub,
 		data: data,
 	}
-	msgs = append(msgs, msg)
+	messages = append(messages, msg)
 	msgMux.Unlock()
 	if isWait {
 		isWait = false
 		wait <- 1
 	}
+}
+
+//回复玩家跨服消息
+func onReplyActor(serverId int, reader *pack.Reader) {
+	var (
+		actorId int64
+		sys     int16
+		cmd     int16
+	)
+
+	reader.Read(&actorId)
+	actor := actordao.GetOnlineActor(actorId)
+	if actor == nil {
+		return
+	}
+	reader.Read(&sys, &cmd)
+	var data = make([]byte, reader.Len())
+	reader.Read(data)
+	actor.Reply(sys, cmd, data)
 }

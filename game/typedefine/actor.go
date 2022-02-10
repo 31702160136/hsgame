@@ -1,7 +1,5 @@
 package typedefine
 
-import "game/pack"
-
 type Actor struct {
 	ActorId    int64  //玩家id
 	AccountId  string //玩家账号
@@ -30,14 +28,14 @@ func (this *Actor) GetData() *Data {
 	return this.Data
 }
 
-func (this *Actor) ReplyWriter(writer *pack.Writer) {
+func (this *Actor) ReplyWriter(writer interface{}) {
 	if this.Account == nil {
 		return
 	}
 	if this.Account.IsClose() {
 		return
 	}
-	this.Account.WriterMsg(writer.Bytes())
+	this.Account.WriterMsg(EncodeWriter(writer))
 }
 
 func (this *Actor) Reply(sys, cmd int16, data ...interface{}) {
@@ -47,7 +45,5 @@ func (this *Actor) Reply(sys, cmd int16, data ...interface{}) {
 	if this.Account.IsClose() {
 		return
 	}
-	writer := pack.NewWriter(sys, cmd)
-	writer.Writer(data...)
-	this.Account.WriterMsg(writer.Bytes())
+	this.Account.WriterMsg(PackWriter(sys, cmd, data...))
 }
