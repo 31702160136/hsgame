@@ -34,6 +34,7 @@ const sql = `
 	  loginTime int DEFAULT NULL,
 	  logoutTime int DEFAULT NULL,
 	  createTime int DEFAULT NULL,
+	  serverId int DEFAULT NULL,
 	  PRIMARY KEY (actorId),
 	  KEY accountId (accountId) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;`
@@ -134,14 +135,18 @@ func GetActor(actorId int64) *t.Actor {
 	}
 
 	db := database.GetDB()
-	result := db.QueryRow("select accountId, `name`, `data`, loginTime, logoutTime, createTime from actor where actorId=? limit 1", actorId)
-	accountId := ""
-	name := ""
-	data := make([]byte, 0)
-	loginTime := int64(0)
-	logoutTime := int64(0)
-	createTime := int64(0)
-	err := result.Scan(&accountId, &name, &data, &loginTime, &logoutTime, &createTime)
+	result := db.QueryRow("select accountId, `name`, `data`, loginTime, logoutTime, createTime, serverId from actor where actorId=? limit 1", actorId)
+	var (
+		accountId  = ""
+		name       = ""
+		data       = make([]byte, 0)
+		loginTime  int64
+		logoutTime int64
+		createTime int64
+		serverId   int
+	)
+
+	err := result.Scan(&accountId, &name, &data, &loginTime, &logoutTime, &createTime, &serverId)
 	if err != nil {
 		log.Error(err.Error())
 		return nil
@@ -153,6 +158,7 @@ func GetActor(actorId int64) *t.Actor {
 		LoginTime:  loginTime,
 		LogoutTime: logoutTime,
 		CreateTime: createTime,
+		ServerId:   serverId,
 	}
 	dataStr, _ := base.Unzip(data)
 	_ = jsoniter.Unmarshal([]byte(dataStr), &actor.Data)

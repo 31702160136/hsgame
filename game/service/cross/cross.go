@@ -120,19 +120,19 @@ func recvMsg(msg *nats.Msg) {
 	dispatch.PushCrossMsg(serverId, msgId, reader)
 }
 
-//推送游戏服消息
-func PushGameServerMsg(serverId int, id int, data []byte) {
-	writer := pack.NewWriter(config.ServerId, id, data)
+//推送游戏服消息（可以根据serverId推送到任何服）
+func PushGameServerMsg(serverId int, msgId int, data []byte) {
+	writer := pack.NewWriter(config.ServerId, msgId, data)
 	pushMsg(fmt.Sprintf(pubGame, serverId), writer.Bytes())
 }
 
-//推送跨服消息
+//推送跨服消息（推送到跨服端）
 func PushCrossServerMsg(msgId int, data []byte) {
 	writer := pack.NewWriter(msgId, config.ServerId, data)
 	pushMsg(fmt.Sprintf(pubCross, config.ServerConfig.CrossServer), writer.Bytes())
 }
 
-//玩家消息转发到跨服
+//玩家消息转发到跨服 (客户端玩家消息转发到跨服端)
 func clientCrossActorMsgHandle(sys, cmd int16, actor *t.Actor, reader *pack.Reader) {
 	writer := pack.NewWriter(proto.CrossActorMsg, sys, cmd)
 	writer.Writer(helper.PacketCrossActor(actor))

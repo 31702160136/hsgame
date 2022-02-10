@@ -5,10 +5,11 @@ package proto
 	S为服务端结果返回
 */
 
-//跨服
+//系统内部跨服协议
 const (
 	CrossActorMsg      = 1 //玩家消息
 	CrossReplyActorMsg = 2 //回复玩家消息
+	CrossTest          = 3 //测试
 )
 
 //基础
@@ -31,8 +32,10 @@ const (
 )
 
 const (
-	TestCTest      int16 = 1
-	TestSTest      int16 = 1
-	TestCCrossTest int16 = 2
-	TestSCrossTest int16 = 2
+	TestCTest       int16 = 1
+	TestSTest       int16 = 1
+	TestCCrossTest  int16 = 2
+	TestSCrossTest  int16 = 2
+	TestCCrossTest2 int16 = 3
+	TestSCrossTest2 int16 = 3
 )

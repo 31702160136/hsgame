@@ -8,7 +8,7 @@ type Actor struct {
 	LoginTime  int64  //登录时间
 	LogoutTime int64  //登出时间
 	CreateTime int64  //创建时间
-	ServerId   int    //服务id
+	ServerId   int    //服务id,最开始的服务id，合服后该id也不会改变
 	Account    *Account
 }
 

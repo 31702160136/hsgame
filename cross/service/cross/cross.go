@@ -67,6 +67,10 @@ func onGameStart() {
 		panic(err)
 	}
 
+	if _, err = nc.Subscribe(pubBroadcast, recvMsg); err != nil {
+		panic(err)
+	}
+
 	onRun()
 }
 
