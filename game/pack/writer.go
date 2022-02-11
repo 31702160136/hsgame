@@ -33,6 +33,12 @@ func NewWriter(data ...interface{}) *Writer {
 	return writer
 }
 
+func GetBytes(data ...interface{}) []byte {
+	writer := &Writer{}
+	writer.Writer(data...)
+	return writer.Bytes()
+}
+
 func (this *Writer) Writer(datas ...interface{}) {
 	writer := this.parse()
 	for _, data := range datas {

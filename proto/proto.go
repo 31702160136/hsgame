@@ -38,4 +38,6 @@ const (
 	TestSCrossTest  int16 = 2
 	TestCCrossTest2 int16 = 3
 	TestSCrossTest2 int16 = 3
+	TestCBroadcast  int16 = 4
+	TestSCBroadcast int16 = 4
 )
